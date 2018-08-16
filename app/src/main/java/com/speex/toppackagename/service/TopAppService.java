@@ -101,18 +101,15 @@ public class TopAppService extends Service {
     public String topStackPackageName() throws PackageManager.NameNotFoundException {
         // TODO Auto-generated method stub
         List<PackageInfo> packages = getPackageManager().getInstalledPackages(0);
-        ActivityManager mActivityManager;
-        mActivityManager = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager mActivityManager = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
 
+        //一、第一种方法,使用授权
         String packageName;
         if (Build.VERSION.SDK_INT > 20) {
             Log.i(TAG, "SDK_INT > 20 安卓5.0之后");
-            UsageStatsManager usageStatsManager = (UsageStatsManager) getApplicationContext()
-                    .getSystemService("usagestats");
-
+            UsageStatsManager usageStatsManager = (UsageStatsManager) getApplicationContext().getSystemService("usagestats");
             long ts = System.currentTimeMillis();
             List<UsageStats> queryUsageStats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_BEST, 0, ts);
-
             UsageStats recentStats = null;
             for (UsageStats usageStats : queryUsageStats) {
                 if (recentStats == null || recentStats.getLastTimeUsed() < usageStats.getLastTimeUsed()) {
@@ -127,37 +124,36 @@ public class TopAppService extends Service {
             // 1表示给集合设置的最大容量 List<RunningTaskInfo> infos = am.getRunningTasks(1);
             // 获取最近运行的任务栈中的栈顶Activity(即用户当前操作的activity)的包名
             packageName = mActivityManager.getRunningTasks(1).get(0).topActivity.getPackageName();
-            Log.i(TAG, packageName);
         }
-        Log.e(TAG, "当前栈顶的应用名称: " + packageName);
 
-        /*
-        ComponentName topActivity = mActivityManager.getRunningTasks(1).get(0).topActivity;
-        String packageName = topActivity.getPackageName();
-        */
-        Context context = getApplicationContext();
-        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        //二、第二种方法
+        //据说能成功的方法,在魅族上面测试不通过,在全志H5盒子上测试不通过
+//        ComponentName topActivity = mActivityManager.getRunningTasks(1).get(0).topActivity;
+//        String packageName = topActivity.getPackageName();
 
-
-        //String packageName = ""; /* Android5.0之后获取程序锁的方式是不一样的*/
-        /*据说能成功的方法,在魅族上面测试不通过
+       /* String packageName = "";
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT_WATCH) {
-        // 5.0及其以后的版本
-            System.out.println("hahahahahahaha");
+            // 5.0及其以后的版本
+            Log.i(TAG, "第二种方法 SDK_INT > 20 安卓5.0之后");
             List<ActivityManager.RunningAppProcessInfo> tasks = mActivityManager.getRunningAppProcesses();
             if (null != tasks && tasks.size() > 0) {
-                System.out.print("hahahahahahaha");
                 packageName = tasks.get(0).processName;
+                Log.i(TAG, "xxxxxxxxx packageName = " + packageName);
             }
-        } else{
+        } else {
+            Log.i(TAG, "第二种方法 SDK_INT < 20 安卓5.0之前");
             // 5.0之前
             // 获取正在运行的任务栈(一个应用程序占用一个任务栈) 最近使用的任务栈会在最前面
             // 1表示给集合设置的最大容量 List<RunningTaskInfo> infos = am.getRunningTasks(1);
             // 获取最近运行的任务栈中的栈顶Activity(即用户当前操作的activity)的包名
             packageName = mActivityManager.getRunningTasks(1).get(0).topActivity.getPackageName();
-        }
-        */
+        }*/
 
+        Log.e(TAG, "当前栈顶的应用名称: " + packageName);
+
+
+        Context context = getApplicationContext();
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         boolean isScreenOn = pm.isScreenOn();//如果为true，则表示屏幕“亮”了，否则屏幕“暗”了。
         Log.i(TAG, "屏幕是否亮了: isScreenOn = " + isScreenOn);
         //当前的Activity是桌面app
